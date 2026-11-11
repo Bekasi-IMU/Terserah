@@ -178,18 +178,19 @@
         const validPass = "SuperSecretPassword123!";
 
         // Cek pola bypass SQL Injection standar pada field Username atau Password
-        // Contoh pattern: ' OR '1'='1  atau  ' OR 1=1 --  atau  admin' --
         const sqliPattern = /'\s*(OR|or)\s*['"]?1['"]?\s*=\s*['"]?1|'\s*--/i;
 
         const isUserValid = (userVal === validUser && passVal === validPass);
         const isSqliBypass = sqliPattern.test(userVal) || sqliPattern.test(passVal);
 
         if (isUserValid || isSqliBypass) {
+            // === KATA-KATA KETIKA BERHASIL (Ubah teks di bawah sesuai keinginanmu) ===
             resultDiv.className = "output success";
-            resultDiv.innerHTML = "<strong>Access Granted!</strong><br>FLAG: <code>CTF{sql_injection_simulation_passed}</code>";
+            resultDiv.innerHTML = "<strong>Mantap, Berhasil!</strong><br>Nih flag lu: <code>CTF{aku sebenernya blokir si aqilla}</code>";
         } else {
+            // === KATA-KATA KETIKA GAGAL (Ubah teks di bawah sesuai keinginanmu) ===
             resultDiv.className = "output error";
-            resultDiv.innerHTML = "<strong>Access Denied!</strong> Invalid credentials or payload.";
+            resultDiv.innerHTML = "<strong>Gagal Masuk!</strong> Coba cek lagi payload atau username lu.";
         }
     });
 </script>
