@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLi Challenge - Mini CTF</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            color: #58a6ff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        p.desc {
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #58a6ff;
+            font-size: 0.9rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #238636;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #2ea043;
+        }
+
+        .query-preview {
+            margin-top: 20px;
+            background: #080c10;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #f0883e;
+            font-size: 0.8rem;
+            word-break: break-all;
+        }
+
+        .output {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            font-size: 0.85rem;
+        }
+
+        .output.success {
+            display: block;
+            background-color: rgba(46, 160, 67, 0.15);
+            border: 1px solid #2ea043;
+            color: #3fb950;
+        }
+
+        .output.error {
+            display: block;
+            background-color: rgba(248, 81, 73, 0.15);
+            border: 1px solid #f85149;
+            color: #f85149;
+        }
+
+        code {
+            color: #f0883e;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Secure Vault v1.0</h2>
+    <p class="desc">Bypass portal autentikasi ini untuk mendapatkan Flag!</p>
+    
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="admin" required autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit">LOGIN</button>
+    </form>
+
+    <div class="query-preview">
+        <strong>Executed Query:</strong><br>
+        <span id="queryDisplay">SELECT * FROM users WHERE username='' AND password=''</span>
+    </div>
+
+    <div id="result" class="output"></div>
+</div>
+
+<script>
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const queryDisplay = document.getElementById('queryDisplay');
+    const resultDiv = document.getElementById('result');
+    const loginForm = document.getElementById('loginForm');
+
+    // Update tampilan query secara real-time saat user mengetik
+    function updateQueryPreview() {
+        const u = usernameInput.value;
+        const p = passwordInput.value;
+        queryDisplay.textContent = `SELECT * FROM users WHERE username='${u}' AND password='${p}'`;
+    }
+
+    usernameInput.addEventListener('input', updateQueryPreview);
+    passwordInput.addEventListener('input', updateQueryPreview);
+
+    // Evaluasi sederhana logika SQL Injection
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const userVal = usernameInput.value;
+        const passVal = passwordInput.value;
+
+        // Simulasi validasi kredensial bawaan
+        const validUser = "admin";
+        const validPass = "SuperSecretPassword123!";
+
+        // Cek pola bypass SQL Injection standar pada field Username atau Password
+        // Contoh pattern: ' OR '1'='1  atau  ' OR 1=1 --  atau  admin' --
+        const sqliPattern = /'\s*(OR|or)\s*['"]?1['"]?\s*=\s*['"]?1|'\s*--/i;
+
+        const isUserValid = (userVal === validUser && passVal === validPass);
+        const isSqliBypass = sqliPattern.test(userVal) || sqliPattern.test(passVal);
+
+        if (isUserValid || isSqliBypass) {
+            resultDiv.className = "output success";
+            resultDiv.innerHTML = "<strong>Access Granted!</strong><br>FLAG: <code>CTF{sql_injection_simulation_passed}</code>";
+        } else {
+            resultDiv.className = "output error";
+            resultDiv.innerHTML = "<strong>Access Denied!</strong> Invalid credentials or payload.";
+        }
+    });
+</script>
+
+</body>
+</html>
